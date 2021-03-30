@@ -47,8 +47,8 @@ def BooleanQuery(query):
         print("normal case", query)
         result = findWord(query[0])
         if result:
-            print(sorted(list(result), key=int))
-            return json.dumps(sorted(list(result), key=int), indent=4)
+            print(list(result))
+            return json.dumps(list(result), indent=4)
         else:
             print("No document found!")
             return ("No document found!")
@@ -70,9 +70,9 @@ def BooleanQuery(query):
     
     if output:
         print(sorted(list(output[0]), key=int))
-        return json.dumps(sorted(list(output[0]), key=int), indent=4)
+        return json.dumps({"result": list(output[0]), "error": ""}, indent=4)
     else:
-        return ("No document found!")
+        return json.dumps({"result": [], "error": "No document found!"})
 
 # 0 = term, 1=or, 2=and, 3=not
 def isValidQuery(test):
@@ -100,7 +100,7 @@ def queryType(query):
         if isValidQuery(test):
             return BooleanQuery(query)
         else:
-            return ("Query is Invalid")
+            return json.dumps({"result": [], "error": "Query is Invalid"})
 
 
 # TODO remove stopwords from query

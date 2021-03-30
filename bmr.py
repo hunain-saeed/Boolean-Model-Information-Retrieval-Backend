@@ -1,5 +1,4 @@
 
-import traceback
 import json
 import os
 import nltk
@@ -22,8 +21,8 @@ def readStopWord():
     try:
         global swl
         swl = open('Stopword-List.txt', 'r').read().split()
-    except Exception:
-        traceback.print_exc()
+    except Exception as e:
+        print(e)
 
 
 # Find the all file name in the directory, extract docid and store it on docid variable
@@ -32,12 +31,12 @@ def AllFileInDir():
     # list of file name in the ShortStories dir
     file_names = os.listdir("ShortStories/")
     # split the name of file to get docid
-    docid = [fn.split('.')[0] for fn in file_names]
+    docid = [int(fn.split('.')[0]) for fn in file_names]
 
     try:
-        docid.sort(key=int)     # sort the docids
-    except Exception:
-        traceback.print_exc()
+        docid.sort()     # sort the docids
+    except Exception as e:
+        print(e)
 
 
 # Remove punctuation from stories
@@ -58,7 +57,7 @@ def removePunctuation(words):
 # Reads all stories from files one by one and stemm the tokens
 def readFilesAndStemm():
     for x in docid:
-        f = open("ShortStories/"+x+".txt", 'r',
+        f = open("ShortStories/"+str(x)+".txt", 'r',
                 encoding='utf8').read()     # read file one by one
         # casefolding and removing punctuations and tokenize (words list)
         f = removePunctuation(f.lower()).split()
