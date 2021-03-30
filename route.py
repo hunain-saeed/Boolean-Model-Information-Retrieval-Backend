@@ -39,19 +39,22 @@ def infixToPostfix(query):
     
     return post
 
+def oneWord(oneWord):
+    print("normal case", query)
+    result = findWord(query[0])
+    if result:
+        print(sorted(list(result)))
+        return json.dumps({"result": sorted(list(result)), "error": ""})
+    else:
+        print("No document found!")
+        return json.dumps({"result": [], "error": "No document found!"})
+
 def BooleanQuery(query):
     query = bmr.removePunctuation(query.lower()).split()
     query = [bmr.ps.stem(word) for word in query]
 
     if len(query) == 1:
-        print("normal case", query)
-        result = findWord(query[0])
-        if result:
-            print(list(result))
-            return json.dumps(list(result), indent=4)
-        else:
-            print("No document found!")
-            return ("No document found!")
+        return oneWord(query)
 
     post = infixToPostfix(query)
     output = []
@@ -67,15 +70,19 @@ def BooleanQuery(query):
         elif precedence[p] == 1:
             a = output.pop()
             output.append(a.union(output.pop()))
-    
     if output:
-        print(sorted(list(output[0]), key=int))
-        return json.dumps({"result": list(output[0]), "error": ""}, indent=4)
+        print(sorted(list(output[0])))
+        return json.dumps({"result": sorted(list(output[0])), "error": ""})
     else:
         return json.dumps({"result": [], "error": "No document found!"})
 
+
+def ProximityQuery(query):
+    
+
+
 # 0 = term, 1=or, 2=and, 3=not
-def isValidQuery(test):
+def isValidBQuery(test):
     position = [(1,2), (2,1), (3,1), (3,2), (0, 3)]
     # adjecent values should not be euqal or same eg1. "term term" not allowed eg2. "and and" not allowed
     if any(map(eq, test, test[1:])):
@@ -90,20 +97,30 @@ def isValidQuery(test):
     else:
         return True
 
-
+# TODO return doc title also
 def queryType(query):
     if '/' in query:
         return ("proximity query")
     else:
         query = query.replace("-", " and ").replace("—", " and ")
         test = [precedence.get(x, 0) for x in query.split()]
-        if isValidQuery(test):
+        if isValidBQuery(test):
             return BooleanQuery(query)
         else:
-            return json.dumps({"result": [], "error": "Query is Invalid"})
+            return json.dumps({"result": [], "error": "Invalid Query"})
 
 
-# TODO remove stopwords from query
+
+
+
+
+
+
+
+
+
+
+# TODO remove this function
 def SimpleQuery(query):
     query = bmr.removePunctuation(query.lower()).split()
     query = [bmr.ps.stem(word) for word in query]

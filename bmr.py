@@ -1,11 +1,8 @@
-
 import json
 import os
 import nltk
 from nltk.stem import PorterStemmer
 
-
-import route
 
 swl = []
 dic = {}
