@@ -127,11 +127,12 @@ def WriteIndexesToFile():
 def ReadIndexesFromFile():
     global i_index
     global p_index
+    global title
 
     try:
         iiFile = open('InvertedIndex.json', 'r', encoding='utf8')
         piFile = open('PositionalIndex.json', 'r', encoding='utf8')
-        titleFile = open('Titels.json', 'w', encoding='utf8')
+        titleFile = open('Titels.json', 'r', encoding='utf8')
 
         i_index = json.loads(iiFile.read())
         p_index = json.loads(piFile.read())

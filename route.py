@@ -142,6 +142,7 @@ def ProximityQuery(w1, w2, pval, result):
         result["error"] = "No document found!"
         return result
 
+
 def isValidPQuery(test):
     if test[-2] != '/':
         return False
@@ -152,6 +153,7 @@ def isValidPQuery(test):
     else:
         return True
 
+
 def isInDoc3(words, docid, pval):
     for p1 in words[0][docid]:
         for p2 in words[1][docid]:
@@ -159,6 +161,7 @@ def isInDoc3(words, docid, pval):
                 if (abs(p1-p2)-1) == pval and (abs(p2-p3)-1) == pval:
                     return True
     return False
+
 
 def PhrasalQuery(query, result):
     if len(query) == 2:
@@ -182,8 +185,6 @@ def PhrasalQuery(query, result):
     return result
 
 
-
-# TODO return doc title also
 def queryType(query):
     result = {"result": [], "error": ""}
     t = query.split()
@@ -225,3 +226,7 @@ def removePuncQuery(query):
         "’", "").replace("—", "").replace("“", "").replace("”", "").replace("‘", "").replace(
         "'", "").replace(",", "").replace("!", "").replace(".", "").replace(":", "").replace(
         ";", "").replace("?", "").replace("-", "").replace("*", "")
+
+def gettitle():
+    return json.dumps(bmr.title)
+
