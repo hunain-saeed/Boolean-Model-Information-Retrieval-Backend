@@ -3,12 +3,12 @@ import os
 import nltk
 from nltk.stem import PorterStemmer
 
-
 swl = []
 dic = {}
 docid = []
 i_index = {}
 p_index = {}
+title = {}
 
 ps = PorterStemmer()
 
@@ -56,7 +56,11 @@ def removePunctuation(words):
 def readFilesAndStemm():
     for x in docid:
         f = open("ShortStories/"+str(x)+".txt", 'r',
-                encoding='utf8').read()     # read file one by one
+                encoding='utf8')    # read file one by one
+        
+        title[x] = f.readline().replace(" \n", "").replace("\n", "")
+
+        f = f.read()
         # casefolding and removing punctuations and tokenize (words list)
         f = removePunctuation(f.lower()).split()
         # Stemming words and storing list of words in a dictionary agains their doc id
@@ -104,15 +108,19 @@ def creatInvertedandPositionalIndex():
 def WriteIndexesToFile():
     json_ii = json.dumps(i_index)
     json_pi = json.dumps(p_index)
+    json_title = json.dumps(title)
 
     iiFile = open('InvertedIndex.json', 'w', encoding='utf8')
     piFile = open('PositionalIndex.json', 'w', encoding='utf8')
+    titleFile = open('Titels.json', 'w', encoding='utf8')
 
     iiFile.write(json_ii)
     piFile.write(json_pi)
+    titleFile.write(json_title)
 
     iiFile.close()
     piFile.close()
+    titleFile.close()
 
 
 # Reading indexes from their respective file and saving them in global dictionaries
@@ -123,12 +131,15 @@ def ReadIndexesFromFile():
     try:
         iiFile = open('InvertedIndex.json', 'r', encoding='utf8')
         piFile = open('PositionalIndex.json', 'r', encoding='utf8')
+        titleFile = open('Titels.json', 'w', encoding='utf8')
 
         i_index = json.loads(iiFile.read())
         p_index = json.loads(piFile.read())
+        title = json.loads(titleFile.read())
         
         iiFile.close()
         piFile.close()
+        titleFile.close()
 
         if (not i_index) or (not p_index):
             readFilesAndStemm()
