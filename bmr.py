@@ -36,6 +36,7 @@ def AllFileInDir():
         print(e)
 
 
+
 # Remove punctuation from stories
 def removePunctuation(words):
     words = words.replace("n’t", " not").replace("’ll", " will").replace("’m", " am").replace(

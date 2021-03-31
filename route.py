@@ -14,43 +14,20 @@ def findWord(word):
         print('"%s" is not a key in the dictionary' % word)
         return set()
 
-def checkPrecedence(stack, q):
-    try:
-        if precedence[q] <= precedence[stack[-1]]:
-            return True
-        else:
-            return False
-    except KeyError: 
-        return False
 
-def infixToPostfix(query):
-    op = []
-    post = []
-    # convert infix to post fix
-    for q in query:
-        if q not in precedence.keys():   # not operator then appent term
-            post.append(q)
-        else:
-            while op and checkPrecedence(op, q):
-                post.append(op.pop())
-            op.append(q)
-    while op:
-        post.append(op.pop())
-    
-    return post
-
-def oneWord(oneWord):
+def oneWord(query):
     print("normal case", query)
     result = findWord(query[0])
     if result:
         print(sorted(list(result)))
-        return json.dumps({"result": sorted(list(result)), "error": ""})
+        return json.dumps({"result": list(result), "error": ""})
     else:
         print("No document found!")
         return json.dumps({"result": [], "error": "No document found!"})
 
+
 def BooleanQuery(query):
-    query = bmr.removePunctuation(query.lower()).split()
+    query = removePuncQuery(query.lower()).split()
     query = [bmr.ps.stem(word) for word in query]
 
     if len(query) == 1:
@@ -72,35 +49,115 @@ def BooleanQuery(query):
             output.append(a.union(output.pop()))
     if output:
         print(sorted(list(output[0])))
-        return json.dumps({"result": sorted(list(output[0])), "error": ""})
+        return json.dumps({"result": list(output[0]), "error": ""})
     else:
         return json.dumps({"result": [], "error": "No document found!"})
 
 
-def ProximityQuery(query):
+def checkPrecedence(stack, q):
+    try:
+        if precedence[q] <= precedence[stack[-1]]:
+            return True
+        else:
+            return False
+    except KeyError: 
+        return False
+
+
+def infixToPostfix(query):
+    op = []
+    post = []
+    # convert infix to post fix
+    for q in query:
+        if q not in precedence.keys():   # not operator then appent term
+            post.append(q)
+        else:
+            while op and checkPrecedence(op, q):
+                post.append(op.pop())
+            op.append(q)
+    while op:
+        post.append(op.pop())
     
+    return post
 
 
-# 0 = term, 1=or, 2=and, 3=not
-def isValidBQuery(test):
-    position = [(1,2), (2,1), (3,1), (3,2), (0, 3)]
-    # adjecent values should not be euqal or same eg1. "term term" not allowed eg2. "and and" not allowed
-    if any(map(eq, test, test[1:])):
+def findPWord(word):
+    try:
+        return bmr.p_index[word]
+    except:
+        return {}
+
+
+def isInDoc(l1, l2, pval):
+    for p1 in l1:
+        for p2 in l2:
+            if (abs(p1-p2)-1) == pval:
+                return True
+    return False
+
+
+def ProximityQuery(w1, w2, pval):
+    w1 = findPWord(w1)
+    w2 = findPWord(w2)
+    common = set(w1.keys()).intersection(set(w2.keys()))
+    result = []
+    if common:
+        for docid in common:
+            if isInDoc(w1[docid], w2[docid], pval):
+                result.append(docid)
+    if result:
+        print(result)
+        return json.dumps({"result": result, "error": ""})
+    else:
+        return json.dumps({"result": [], "error": "No document found!"})
+
+
+def isValidPQuery(test):
+    if test[-2] != '/':
         return False
-    # query shouldn't start with these two word "and" "or" and shouldn't end with operator
-    elif (test[0] == 1 or test[0] == 2) or (test[-1] == 1 or test[-1] == 2 or test[-1] == 3):
+    elif int(test[-1]) < 0:
         return False
-    # and or shouldn't be adjecent in any order 2nd "and, or" shouldn't come after "not"
-    # 3rd "not" shouldn't come after term
-    elif any(item in position for item in zip(test, test[1:])):
+    elif len(test) > 4:
         return False
     else:
         return True
 
+# 0 = term, 1=or, 2=and, 3=not
+def isValidBQuery(test):
+    try:
+        position = [(1,2), (2,1), (3,1), (3,2), (0, 3)]
+        if test[0] == 3 and (test[1] in precedence.values()):
+            return False
+        # adjecent values should not be euqal or same eg1. "term term" not allowed eg2. "and and" not allowed
+        if any(map(eq, test, test[1:])):
+            return False
+        # query shouldn't start with these two word "and" "or" and shouldn't end with operator
+        elif (test[0] == 1 or test[0] == 2) or (test[-1] == 1 or test[-1] == 2 or test[-1] == 3):
+            return False
+        # and or shouldn't be adjecent in any order 2nd "and, or" shouldn't come after "not"
+        # 3rd "not" shouldn't come after term
+        elif any(item in position for item in zip(test, test[1:])):
+            return False
+        else:
+            return True
+    except Exception as e:
+        print(e)
+
+
 # TODO return doc title also
 def queryType(query):
-    if '/' in query:
-        return ("proximity query")
+    if '&' in query:
+        query = query.replace("&", " / ")
+        query = removePuncQuery(query).split()
+        query = [bmr.ps.stem(word) for word in query]
+        if isValidPQuery(query):
+            pval = int(query[-1])
+            print(query, pval)
+            return ProximityQuery(query[0], query[1], pval)
+        else:
+            return json.dumps({"result": [], "error": "Invalid Query"})
+    # elif "\"" in query:
+    # For Boolean queries
     else:
         query = query.replace("-", " and ").replace("—", " and ")
         test = [precedence.get(x, 0) for x in query.split()]
@@ -109,48 +166,11 @@ def queryType(query):
         else:
             return json.dumps({"result": [], "error": "Invalid Query"})
 
+    return json.dumps({"result": [], "error": "OLNY SUPPORTS BOOLEAN AND PROXIMITY QUERIES"})
 
 
-
-
-
-
-
-
-
-
-
-# TODO remove this function
-def SimpleQuery(query):
-    query = bmr.removePunctuation(query.lower()).split()
-    query = [bmr.ps.stem(word) for word in query]
-    print(query)
-    result = set()
-    # for queries containing only OR operator also run for one word queries
-    if ('and' not in query) and ('not' not in query):
-        print("or query run")
-        query = [x for x in query if x != 'or']
-        for word in query:
-            s1 = findWord(word)
-            if s1:
-                result = result.union(s1)
-
-    elif ('or' not in query) and ('not' not in query):   # for queries containing only AND operator
-        print("and query run")
-        query = [x for x in query if x != 'and']
-        for i, word in enumerate(query):
-            if i == 0:
-                result = findWord(word)
-                continue
-            s1 = findWord(word)
-            result = result.intersection(s1)
-
-    elif ('or' not in query) and ('and' not in query) and ('not' == query[0]):
-        print("not query run")
-        s1 = findWord(query[1])
-        result = set(bmr.docid) - s1
-
-    if result:
-        return json.dumps(sorted(list(result), key=int), indent=4)
-    else:
-        return ("No document found!")
+def removePuncQuery(query):
+    return query.replace("(", "").replace(")", "").replace("[", "").replace("]", "").replace(
+        "’", "").replace("—", "").replace("“", "").replace("”", "").replace("‘", "").replace(
+        "'", "").replace(",", "").replace("!", "").replace(".", "").replace(":", "").replace(
+        ";", "").replace("?", "").replace("-", "").replace("*", "")
