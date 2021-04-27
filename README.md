@@ -6,6 +6,5 @@ This project was built as a part of the Information Retrieval Course. The task i
 
 Preprocessed the text from the documents in term of tokenization in which case folding, stop-words removal, and stemming is done. Then Inverted and Positional Index are created.
 
-Frontend developed on React, Material-UI, and CSS. 
-
+Frontend developed on React, Material-UI, and CSS. [Boolean-Model-IR-Frontend](https://github.com/hunain631/Boolean-Model-IR-Frontend)
 Backend is developed on Flask.
