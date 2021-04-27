@@ -36,7 +36,6 @@ def AllFileInDir():
         print(e)
 
 
-
 # Remove punctuation from stories
 def removePunctuation(words):
     words = words.replace("n’t", " not").replace("’ll", " will").replace("’m", " am").replace(
@@ -67,8 +66,8 @@ def readFilesAndStemm():
 
         dic[x] = [ps.stem(word) if word not in swl else word for word in f]
 
-        # making inverted index and positional index
-        creatInvertedandPositionalIndex()
+    # making inverted index and positional index
+    creatInvertedandPositionalIndex()
         # print(dic)
 
 
@@ -90,8 +89,8 @@ def positionIndex(word, docid, position):
     else:  # if doc id is not in the list then append it againt the given word/key
         if docid not in p_index[word]:
             p_index[word][docid] = []
-    if position not in p_index[word][docid]:
-        p_index[word][docid].append(position)
+    # if position not in p_index[word][docid]:
+    p_index[word][docid].append(position)
 
 
 # Inverted index and Positional index creation

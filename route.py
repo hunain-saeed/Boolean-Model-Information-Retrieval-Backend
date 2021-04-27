@@ -225,7 +225,7 @@ def removePuncQuery(query):
     return query.replace("(", "").replace(")", "").replace("[", "").replace("]", "").replace(
         "’", "").replace("—", "").replace("“", "").replace("”", "").replace("‘", "").replace(
         "'", "").replace(",", "").replace("!", "").replace(".", "").replace(":", "").replace(
-        ";", "").replace("?", "").replace("-", "").replace("*", "")
+        ";", "").replace("?", "").replace("-", "").replace("*", "").replace('"', "")
 
 def gettitle():
     return json.dumps(bmr.title)
