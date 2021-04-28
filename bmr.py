@@ -58,13 +58,14 @@ def readFilesAndStemm():
                 encoding='utf8')    # read file one by one
         
         title[x] = f.readline().replace(" \n", "").replace("\n", "")
-
+        f.seek(0)
         f = f.read()
         # casefolding and removing punctuations and tokenize (words list)
         f = removePunctuation(f.lower()).split()
         # Stemming words and storing list of words in a dictionary agains their doc id
 
         dic[x] = [ps.stem(word) if word not in swl else word for word in f]
+        
 
     # making inverted index and positional index
     creatInvertedandPositionalIndex()
